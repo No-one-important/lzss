@@ -121,18 +121,13 @@ fn compress(input: &[u8]) -> Vec<u8> {
         if max_len > 6 {
             i += max_len - 1;
             if current_chunk.data.len() != 0 {
-                for b in Chunk::Data(current_chunk).bytes() {
-                    output.push(b);
-                }
+                output.extend_from_slice(&Chunk::Data(current_chunk).bytes());
             }
-            for b in Chunk::BackRef(BackRef {
+            output.extend_from_slice(&Chunk::BackRef(BackRef {
                 len: max_len as u16,
                 dist: best_dist as u16,
             })
-            .bytes()
-            {
-                output.push(b);
-            }
+            .bytes());
 
             current_chunk = LitData { data: vec![] };
         } else {
@@ -140,9 +135,7 @@ fn compress(input: &[u8]) -> Vec<u8> {
         }
 
         if current_chunk.data.len() > 65535 {
-            for b in Chunk::Data(current_chunk).bytes() {
-                output.push(b);
-            }
+            output.extend_from_slice(&Chunk::Data(current_chunk).bytes());
 
             current_chunk = LitData { data: vec![] };
         }
